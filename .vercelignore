@@ -1,0 +1,17 @@
+node_modules/
+.git/
+.env
+.env.example
+server.js
+database.js
+models/
+routes/
+views/
+public/
+Dockerfile
+docker-compose.yml
+ecosystem.config.js
+Procfile
+start_website.bat
+README.md
+seed_logs.js
