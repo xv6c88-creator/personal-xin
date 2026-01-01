@@ -28,18 +28,18 @@ async function renderFileTo(template, data, outPath) {
 
 async function main() {
   const root = __dirname;
-  const dist = path.join(root, 'dist');
+  const public = path.join(root, 'public');
   const templates = path.join(root, 'src', 'templates');
   const assets = path.join(root, 'src', 'assets');
-  await ensureDir(dist);
-  await copyDir(assets, path.join(dist, 'assets'));
+  await ensureDir(public);
+  await copyDir(assets, path.join(public, 'assets'));
   const apiBase = process.env.API_BASE_URL || '';
   await renderFileTo(
     path.join(templates, 'index.ejs'),
     { title: 'my-ejs-site', apiBase },
-    path.join(dist, 'index.html')
+    path.join(public, 'index.html')
   );
-  console.log('Built to', dist);
+  console.log('Built to', public);
 }
 
 main().catch(err => {
