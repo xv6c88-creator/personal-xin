@@ -1,8 +1,43 @@
 <%- include('partials/header') %>
 <div class="container py-5">
   <h1 class="mb-3">Welcome to my-ejs-site</h1>
-  <p class="lead">This is a sample EJS homepage rendered for GitHub Pages workflow.</p>
-  <a class="btn btn-primary" href="index.html">Home</a>
+  <p class="lead">This static page will load products from remote API.</p>
+  <div id="products" class="row g-4"></div>
+  <script>
+    window.API_BASE = "<%= apiBase %>";
+    (async function () {
+      const base = window.API_BASE || "";
+      const url = base ? (base.replace(/\/+$/,'') + '/api/products') : '/api/products';
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const list = (data && data.products) || [];
+        const el = document.getElementById('products');
+        if (!list.length) {
+          el.innerHTML = '<p class="text-muted">No products available.</p>';
+          return;
+        }
+        el.innerHTML = list.slice(0, 6).map(p => {
+          const name = p.name || p.name_en || 'Product';
+          const desc = (p.description || p.description_en || '').slice(0, 80);
+          const img = p.image ? p.image : 'assets/css/style.css'; // fallback
+          return `
+            <div class="col-md-4">
+              <div class="card h-100 shadow-sm">
+                <img class="card-img-top" src="${img}" alt="${name}" onerror="this.style.display='none'">
+                <div class="card-body">
+                  <h5 class="card-title">${name}</h5>
+                  <p class="card-text">${desc}</p>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error(e);
+        document.getElementById('products').innerHTML = '<p class="text-danger">Failed to load products.</p>';
+      }
+    })();
+  </script>
 </div>
 <%- include('partials/footer') %>
-
