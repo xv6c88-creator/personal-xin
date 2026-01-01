@@ -7,7 +7,6 @@ database.js
 models/
 routes/
 views/
-public/
 Dockerfile
 docker-compose.yml
 ecosystem.config.js
