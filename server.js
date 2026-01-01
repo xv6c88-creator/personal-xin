@@ -12,11 +12,13 @@ const ChatSession = require('./models/ChatSession');
 const ChatMessage = require('./models/ChatMessage');
 const locales = require('./config/locales');
 const geoip = require('geoip-lite');
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+app.use(cors());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -180,6 +182,88 @@ const adminRoutes = require('./routes/admin');
 
 app.use('/', mainRoutes);
 app.use('/admin', adminRoutes);
+
+// Public JSON API for frontend static site
+app.get('/api/products', async (req, res) => {
+    try {
+        const products = await Product.findAll({ order: [['id', 'DESC']], limit: 50 });
+        res.json({ ok: true, products });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ ok: false, error: 'server_error' });
+    }
+});
+
+app.get('/api/products/:id', async (req, res) => {
+    try {
+        const product = await Product.findByPk(req.params.id);
+        if (!product) return res.status(404).json({ ok: false, error: 'not_found' });
+        const mainImages = await ProductImage.findAll({ where: { productId: req.params.id, is_main: true } });
+        const galleryImages = await ProductImage.findAll({ where: { productId: req.params.id, is_main: false } });
+        res.json({ ok: true, product, mainImages, galleryImages });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ ok: false, error: 'server_error' });
+    }
+});
+
+app.get('/api/categories', async (req, res) => {
+    try {
+        const categories = await Category.findAll({ order: [['id', 'ASC']] });
+        res.json({ ok: true, categories });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ ok: false, error: 'server_error' });
+    }
+});
+
+app.get('/api/site-config', async (req, res) => {
+    try {
+        let config = await SiteConfig.findOne({ where: { key: 'contact_info' } });
+        if (!config) {
+            config = {
+                address_zh: '地址未配置',
+                address_en: 'Address not set',
+                phone: '',
+                email: '',
+                work_hours_zh: '',
+                work_hours_en: '',
+                whatsapp: ''
+            };
+        }
+        res.json({ ok: true, config });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ ok: false, error: 'server_error' });
+    }
+});
+
+app.get('/api/about', async (req, res) => {
+    try {
+        let about = await SiteConfig.findOne({ where: { key: 'about_info' } });
+        res.json({ ok: true, about: about || {} });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ ok: false, error: 'server_error' });
+    }
+});
+
+app.get('/api/services', async (req, res) => {
+    try {
+        let services = await SiteConfig.findOne({ where: { key: 'services_info' } });
+        let resources = [];
+        try {
+            const SupportResource = require('./models/SupportResource');
+            resources = await SupportResource.findAll({ order: [['id', 'DESC']] });
+        } catch (e) {
+            resources = [];
+        }
+        res.json({ ok: true, services: services || {}, resources });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ ok: false, error: 'server_error' });
+    }
+});
 
 // Database Sync and Server Start
 // Using { alter: true } to update table schema without deleting data

@@ -33,7 +33,12 @@ async function main() {
   const assets = path.join(root, 'src', 'assets');
   await ensureDir(dist);
   await copyDir(assets, path.join(dist, 'assets'));
-  await renderFileTo(path.join(templates, 'index.ejs'), { title: 'my-ejs-site' }, path.join(dist, 'index.html'));
+  const apiBase = process.env.API_BASE_URL || '';
+  await renderFileTo(
+    path.join(templates, 'index.ejs'),
+    { title: 'my-ejs-site', apiBase },
+    path.join(dist, 'index.html')
+  );
   console.log('Built to', dist);
 }
 
@@ -41,4 +46,3 @@ main().catch(err => {
   console.error(err);
   process.exit(1);
 });
-

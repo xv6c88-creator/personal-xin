@@ -27,3 +27,4 @@ database/*.sqlite
 # IDEs
 .vscode/
 .idea/
+.vercelignore

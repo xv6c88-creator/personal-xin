@@ -24,6 +24,7 @@
     "@vitalets/google-translate-api": "^9.2.1",
     "async": "^3.2.6",
     "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.9",
     "express": "^5.2.1",
